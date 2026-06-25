@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "id": "durabilityswap",
+  "version": "1.0.0",
+  "name": "Durability Swap",
+  "description": "Mueve automaticamente la herramienta a la mano secundaria cuando su durabilidad llega al 10%. Regresa a la mano principal al repararse.",
+  "authors": [
+    "TuNombre"
+  ],
+  "contact": {},
+  "license": "MIT",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "com.durabilityswap.DurabilitySwapMod"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=0.11.0",
+    "fabric": "*",
+    "minecraft": "1.16.5"
+  }
+}
