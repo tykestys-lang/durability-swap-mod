@@ -11,20 +11,16 @@ version = "1.0.0"
 group = "com.durabilityswap"
 
 repositories {
-    // Fabric Maven
     maven { url "https://maven.fabricmc.net/" }
+    maven { url "https://libraries.minecraft.net/" }
+    mavenCentral()
 }
 
 dependencies {
-    // Minecraft 1.16.5
     minecraft "com.mojang:minecraft:1.16.5"
     mappings "net.fabricmc:yarn:1.16.5+build.9:v2"
-
-    // Fabric Loader
     modImplementation "net.fabricmc:fabric-loader:0.11.6"
-
-    // Fabric API
-    modImplementation "net.fabricmc:fabric-api:fabric-api:0.32.9+1.16"
+    modImplementation "net.fabricmc.fabric-api:fabric-api:0.32.9+1.16"
 }
 
 processResources {
@@ -36,14 +32,10 @@ processResources {
     from(sourceSets.main.resources.srcDirs) {
         exclude "fabric.mod.json"
     }
-    duplicatesStrategy = DuplicatesStrategy.INCLUDE
 }
 
 tasks.withType(JavaCompile).configureEach {
     it.options.encoding = "UTF-8"
-    if (JavaVersion.current().isJava9Compatible()) {
-        it.options.release = 8
-    }
 }
 
 jar {
