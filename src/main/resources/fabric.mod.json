@@ -3,15 +3,13 @@
   "id": "durabilityswap",
   "version": "1.0.0",
   "name": "Durability Swap",
-  "description": "Mueve automaticamente la herramienta a la mano secundaria cuando su durabilidad llega al 10%. Regresa a la mano principal al repararse.",
-  "authors": [
-    "TuNombre"
-  ],
+  "description": "Mueve la herramienta al offhand cuando llega al 10% de durabilidad.",
+  "authors": ["CokiMcXYellexility"],
   "contact": {},
   "license": "MIT",
-  "environment": "*",
+  "environment": "client",
   "entrypoints": {
-    "main": [
+    "client": [
       "com.durabilityswap.DurabilitySwapMod"
     ]
   },
