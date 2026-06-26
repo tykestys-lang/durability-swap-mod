@@ -4,6 +4,7 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.options.KeyBinding;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.entity.player.PlayerEntity;
@@ -18,9 +19,10 @@ import org.lwjgl.glfw.GLFW;
 public class DurabilitySwapMod implements ClientModInitializer {
 
     public static final String MOD_ID = "durabilityswap";
-    private static final float DURABILITY_THRESHOLD = 0.10f;
+    private static float durabilityThreshold = 0.10f;
     private static boolean modEnabled = true;
     private static KeyBinding toggleKey;
+    private static KeyBinding menuKey;
 
     @Override
     public void onInitializeClient() {
@@ -31,8 +33,14 @@ public class DurabilitySwapMod implements ClientModInitializer {
             "category.durabilityswap"
         ));
 
+        menuKey = KeyBindingHelper.registerKeyBinding(new KeyBinding(
+            "key.durabilityswap.menu",
+            InputUtil.Type.KEYSYM,
+            GLFW.GLFW_KEY_J,
+            "category.durabilityswap"
+        ));
+
         ClientTickEvents.END_CLIENT_TICK.register(this::onClientTick);
-        System.out.println("[DurabilitySwap] Mod initialized!");
     }
 
     private void onClientTick(MinecraftClient client) {
@@ -47,6 +55,10 @@ public class DurabilitySwapMod implements ClientModInitializer {
             );
         }
 
+        while (menuKey.wasPressed()) {
+            client.openScreen(new DurabilitySwapScreen(client.currentScreen));
+        }
+
         if (!modEnabled) return;
         checkAndSwapTool(client.player);
     }
@@ -54,35 +66,42 @@ public class DurabilitySwapMod implements ClientModInitializer {
     private void checkAndSwapTool(PlayerEntity player) {
         PlayerInventory inventory = player.inventory;
         ItemStack mainHandStack = inventory.getMainHandStack();
-        ItemStack offhandStack = inventory.offHand.get(0);
 
-        boolean mainHandIsTool = isTool(mainHandStack);
-        boolean mainHandLowDurability = mainHandIsTool && isLowDurability(mainHandStack);
+        if (!isTool(mainHandStack)) return;
+        if (!isLowDurability(mainHandStack)) return;
 
-        if (mainHandLowDurability && offhandStack.isEmpty()) {
-            inventory.offHand.set(0, mainHandStack.copy());
-            inventory.main.set(inventory.selectedSlot, ItemStack.EMPTY);
+        // Buscar otra herramienta igual en el inventario
+        for (int i = 0; i < 36; i++) {
+            if (i == inventory.selectedSlot) continue;
+            ItemStack candidate = inventory.main.get(i);
+            if (candidate.isEmpty()) continue;
+            if (candidate.getItem() != mainHandStack.getItem()) continue;
+            if (isLowDurability(candidate)) continue;
+
+            // Mover la herramienta buena al slot activo
+            inventory.main.set(i, mainHandStack.copy());
+            inventory.main.set(inventory.selectedSlot, candidate.copy());
+
             player.sendMessage(
-                new LiteralText("⚠ ").formatted(Formatting.YELLOW)
-                    .append(new LiteralText("Herramienta al 10%! Movida a la mano secundaria.").formatted(Formatting.GOLD)),
+                new LiteralText("⚠ Herramienta al " + (int)(durabilityThreshold * 100) + "%! Cambiando a herramienta nueva.")
+                    .formatted(Formatting.GOLD),
                 true
             );
             return;
         }
 
-        boolean offhandIsTool = isTool(offhandStack);
-        boolean offhandHighDurability = offhandIsTool && !isLowDurability(offhandStack);
-
-        if (offhandHighDurability && mainHandStack.isEmpty()) {
-            inventory.main.set(inventory.selectedSlot, offhandStack.copy());
-            inventory.offHand.set(0, ItemStack.EMPTY);
-            player.sendMessage(
-                new LiteralText("✔ ").formatted(Formatting.GREEN)
-                    .append(new LiteralText("Herramienta reparada, devuelta a la mano principal.").formatted(Formatting.GREEN)),
-                true
-            );
-        }
+        // No hay herramienta de repuesto
+        player.sendMessage(
+            new LiteralText("⚠ Herramienta al " + (int)(durabilityThreshold * 100) + "%! No hay repuesto en el inventario.")
+                .formatted(Formatting.RED),
+            true
+        );
     }
+
+    public static float getDurabilityThreshold() { return durabilityThreshold; }
+    public static void setDurabilityThreshold(float value) { durabilityThreshold = value; }
+    public static boolean isModEnabled() { return modEnabled; }
+    public static void setModEnabled(boolean value) { modEnabled = value; }
 
     private boolean isTool(ItemStack stack) {
         if (stack.isEmpty()) return false;
@@ -95,6 +114,6 @@ public class DurabilitySwapMod implements ClientModInitializer {
         if (maxDamage <= 0) return false;
         int remaining = maxDamage - stack.getDamage();
         float ratio = (float) remaining / (float) maxDamage;
-        return ratio <= DURABILITY_THRESHOLD;
+        return ratio <= durabilityThreshold;
     }
 }
