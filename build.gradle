@@ -36,15 +36,7 @@ processResources {
     from(sourceSets.main.resources.srcDirs) {
         exclude "fabric.mod.json"
     }
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE
 }
-
-tasks.withType(JavaCompile).configureEach {
-    it.options.encoding = "UTF-8"
-    if (JavaVersion.current().isJava9Compatible()) {
-        it.options.release = 8
-    }
-}
-
-jar {
-    from "LICENSE"
+    
 }
