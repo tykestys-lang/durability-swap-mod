@@ -18,99 +18,14 @@ import org.lwjgl.glfw.GLFW;
 public class DurabilitySwapMod implements ClientModInitializer {
 
     public static final String MOD_ID = "durabilityswap";
+    public static final String CREDITS = "CokiMc";
     private static float durabilityThreshold = 0.10f;
     private static boolean modEnabled = true;
-    private static KeyBinding toggleKey;
+    private static boolean useOffhand = false;
     private static KeyBinding menuKey;
 
     @Override
     public void onInitializeClient() {
-        toggleKey = KeyBindingHelper.registerKeyBinding(new KeyBinding(
-            "key.durabilityswap.toggle",
-            InputUtil.Type.KEYSYM,
-            GLFW.GLFW_KEY_K,
-            "category.durabilityswap"
-        ));
-
         menuKey = KeyBindingHelper.registerKeyBinding(new KeyBinding(
             "key.durabilityswap.menu",
             InputUtil.Type.KEYSYM,
-            GLFW.GLFW_KEY_J,
-            "category.durabilityswap"
-        ));
-
-        ClientTickEvents.END_CLIENT_TICK.register(this::onClientTick);
-    }
-
-    private void onClientTick(MinecraftClient client) {
-        if (client.player == null) return;
-
-        while (toggleKey.wasPressed()) {
-            modEnabled = !modEnabled;
-            client.player.sendMessage(
-                new LiteralText(modEnabled ? "✔ DurabilitySwap ACTIVADO" : "✖ DurabilitySwap DESACTIVADO")
-                    .formatted(modEnabled ? Formatting.GREEN : Formatting.RED),
-                true
-            );
-        }
-
-        while (menuKey.wasPressed()) {
-            client.openScreen(new DurabilitySwapScreen(client.currentScreen));
-        }
-
-        if (!modEnabled) return;
-        checkAndSwapTool(client.player);
-    }
-
-    private void checkAndSwapTool(PlayerEntity player) {
-        PlayerInventory inventory = player.inventory;
-        ItemStack mainHandStack = inventory.getMainHandStack();
-
-        if (!isTool(mainHandStack)) return;
-        if (!isLowDurability(mainHandStack)) return;
-
-        for (int i = 0; i < 36; i++) {
-            if (i == inventory.selectedSlot) continue;
-            ItemStack candidate = inventory.main.get(i);
-            if (candidate.isEmpty()) continue;
-            if (candidate.getItem() != mainHandStack.getItem()) continue;
-            if (isLowDurability(candidate)) continue;
-
-            ItemStack temp = mainHandStack.copy();
-            inventory.main.set(inventory.selectedSlot, candidate.copy());
-            inventory.main.set(i, temp);
-
-            player.sendMessage(
-                new LiteralText("⚠ Herramienta al " + (int)(durabilityThreshold * 100) + "%! Cambiando a herramienta nueva.")
-                    .formatted(Formatting.GOLD),
-                true
-            );
-            return;
-        }
-
-        player.sendMessage(
-            new LiteralText("⚠ Herramienta al " + (int)(durabilityThreshold * 100) + "%! Sin repuesto.")
-                .formatted(Formatting.RED),
-            true
-        );
-    }
-
-    public static float getDurabilityThreshold() { return durabilityThreshold; }
-    public static void setDurabilityThreshold(float value) { durabilityThreshold = value; }
-    public static boolean isModEnabled() { return modEnabled; }
-    public static void setModEnabled(boolean value) { modEnabled = value; }
-
-    private boolean isTool(ItemStack stack) {
-        if (stack.isEmpty()) return false;
-        return stack.getItem() instanceof ToolItem || stack.getItem() instanceof SwordItem;
-    }
-
-    private boolean isLowDurability(ItemStack stack) {
-        if (!stack.isDamageable()) return false;
-        int maxDamage = stack.getMaxDamage();
-        if (maxDamage <= 0) return false;
-        int remaining = maxDamage - stack.getDamage();
-        float ratio = (float) remaining / (float) maxDamage;
-        return ratio <= durabilityThreshold;
-    }
-}
