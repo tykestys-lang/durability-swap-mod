@@ -33,7 +33,7 @@ public class DurabilitySwapScreen extends Screen {
         ));
 
         this.addButton(new ButtonWidget(cx - 100, cy - 20, 90, 20,
-            new LiteralText("- 5%"),
+            new LiteralText("- 5"),
             button -> {
                 threshold = Math.max(0.05f, threshold - 0.05f);
                 DurabilitySwapMod.setDurabilityThreshold(threshold);
@@ -41,7 +41,7 @@ public class DurabilitySwapScreen extends Screen {
         ));
 
         this.addButton(new ButtonWidget(cx + 10, cy - 20, 90, 20,
-            new LiteralText("+ 5%"),
+            new LiteralText("+ 5"),
             button -> {
                 threshold = Math.min(0.50f, threshold + 0.05f);
                 DurabilitySwapMod.setDurabilityThreshold(threshold);
@@ -57,5 +57,14 @@ public class DurabilitySwapScreen extends Screen {
     @Override
     public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
         this.renderBackground(matrices);
+        int pct = (int)(threshold * 100);
         drawCenteredString(matrices, this.textRenderer, "DurabilitySwap Config", this.width / 2, this.height / 2 - 90, 0xFFFFFF);
-        drawCenteredString(matrices, this.textRenderer, "Umbral: " + (int)(threshold * 100) + "%", this.width / 2, this.height / 2 - 35,
+        drawCenteredString(matrices, this.textRenderer, "Umbral: " + pct, this.width / 2, this.height / 2 - 35, 0xFFFF55);
+        super.render(matrices, mouseX, mouseY, delta);
+    }
+
+    @Override
+    public boolean shouldCloseOnEsc() {
+        return true;
+    }
+}
