@@ -4,7 +4,6 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.options.KeyBinding;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.entity.player.PlayerEntity;
@@ -70,7 +69,6 @@ public class DurabilitySwapMod implements ClientModInitializer {
         if (!isTool(mainHandStack)) return;
         if (!isLowDurability(mainHandStack)) return;
 
-        // Buscar otra herramienta igual en el inventario
         for (int i = 0; i < 36; i++) {
             if (i == inventory.selectedSlot) continue;
             ItemStack candidate = inventory.main.get(i);
@@ -78,9 +76,9 @@ public class DurabilitySwapMod implements ClientModInitializer {
             if (candidate.getItem() != mainHandStack.getItem()) continue;
             if (isLowDurability(candidate)) continue;
 
-            // Mover la herramienta buena al slot activo
-            inventory.main.set(i, mainHandStack.copy());
+            ItemStack temp = mainHandStack.copy();
             inventory.main.set(inventory.selectedSlot, candidate.copy());
+            inventory.main.set(i, temp);
 
             player.sendMessage(
                 new LiteralText("⚠ Herramienta al " + (int)(durabilityThreshold * 100) + "%! Cambiando a herramienta nueva.")
@@ -90,9 +88,8 @@ public class DurabilitySwapMod implements ClientModInitializer {
             return;
         }
 
-        // No hay herramienta de repuesto
         player.sendMessage(
-            new LiteralText("⚠ Herramienta al " + (int)(durabilityThreshold * 100) + "%! No hay repuesto en el inventario.")
+            new LiteralText("⚠ Herramienta al " + (int)(durabilityThreshold * 100) + "%! Sin repuesto.")
                 .formatted(Formatting.RED),
             true
         );
