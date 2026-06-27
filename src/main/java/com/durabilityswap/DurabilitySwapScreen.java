@@ -12,7 +12,7 @@ public class DurabilitySwapScreen extends Screen {
     private boolean enabled;
 
     public DurabilitySwapScreen(Screen parent) {
-        super(new LiteralText("DurabilitySwap Config"));
+        super(new LiteralText("Config"));
         this.parent = parent;
         this.threshold = DurabilitySwapMod.getDurabilityThreshold();
         this.enabled = DurabilitySwapMod.isModEnabled();
@@ -20,10 +20,10 @@ public class DurabilitySwapScreen extends Screen {
 
     @Override
     protected void init() {
-        int centerX = this.width / 2;
-        int centerY = this.height / 2;
+        int cx = this.width / 2;
+        int cy = this.height / 2;
 
-        this.addButton(new ButtonWidget(centerX - 100, centerY - 60, 200, 20,
+        this.addButton(new ButtonWidget(cx - 100, cy - 60, 200, 20,
             new LiteralText("Mod: " + (enabled ? "ACTIVADO" : "DESACTIVADO")),
             button -> {
                 enabled = !enabled;
@@ -32,7 +32,7 @@ public class DurabilitySwapScreen extends Screen {
             }
         ));
 
-        this.addButton(new ButtonWidget(centerX - 100, centerY - 20, 90, 20,
+        this.addButton(new ButtonWidget(cx - 100, cy - 20, 90, 20,
             new LiteralText("- 5%"),
             button -> {
                 threshold = Math.max(0.05f, threshold - 0.05f);
@@ -40,7 +40,7 @@ public class DurabilitySwapScreen extends Screen {
             }
         ));
 
-        this.addButton(new ButtonWidget(centerX + 10, centerY - 20, 90, 20,
+        this.addButton(new ButtonWidget(cx + 10, cy - 20, 90, 20,
             new LiteralText("+ 5%"),
             button -> {
                 threshold = Math.min(0.50f, threshold + 0.05f);
@@ -48,7 +48,7 @@ public class DurabilitySwapScreen extends Screen {
             }
         ));
 
-        this.addButton(new ButtonWidget(centerX - 100, centerY + 40, 200, 20,
+        this.addButton(new ButtonWidget(cx - 100, cy + 40, 200, 20,
             new LiteralText("Cerrar"),
             button -> this.client.openScreen(parent)
         ));
@@ -57,4 +57,5 @@ public class DurabilitySwapScreen extends Screen {
     @Override
     public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
         this.renderBackground(matrices);
-        drawCenteredString(matrices, this.textRenderer, "DurabilitySwap
+        drawCenteredString(matrices, this.textRenderer, "DurabilitySwap Config", this.width / 2, this.height / 2 - 90, 0xFFFFFF);
+        drawCenteredString(matrices, this.textRenderer, "Umbral: " + (int)(threshold * 100) + "%", this.width / 2, this.height / 2 - 35,
